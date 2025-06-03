@@ -34,6 +34,11 @@ class User extends Authenticatable implements JWTSubject
         'remember_token',
     ];
 
+
+    public function tasks()
+    {
+        return $this->hasMany(Task::class);
+    }
     /**
      * Get the attributes that should be cast.
      *
@@ -59,4 +64,6 @@ class User extends Authenticatable implements JWTSubject
     {
         return []; // você pode adicionar claims personalizados aqui, se quiser
     }
+
+
 }
