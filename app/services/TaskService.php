@@ -14,8 +14,14 @@ class TaskService
         $this->taskRepository = $taskRepository;
     }
 
+    public function getAllTasks($userId)
+    {
+        return $this->taskRepository->getAllTasks($userId);
+    }
+
     public function createTask($data)
     {
+
         try {
 
             $values = [
@@ -26,6 +32,7 @@ class TaskService
 
             return $this->taskRepository->createTask($values);
         } catch (\Throwable $th) {
+
             return response()->json([
                 'success' => false,
                 'message' => $th->getMessage()
@@ -36,17 +43,27 @@ class TaskService
     public function updateTask($data, $id)
     {
         try {
-            $values = [
-                'title' => $data['title'],
-                'description' => $data['description'] ?? null
-            ];
+            return $this->taskRepository->updateTask($data, $id);
 
-            return $this->taskRepository->updateTask($values, $id);
         } catch (\Throwable $th) {
-            return response()->json([
-                'success' => false,
-                'message' => $th->getMessage()
-            ], 400);
+            return response()->json(['success' => false,'message' => $th->getMessage() ], 400);
+        }
+    }
+
+    public function deleteTask($id)
+    {
+        try {
+            return $this->taskRepository->deleteTask($id);
+        } catch (\Throwable $th) {
+            return response()->json(['success' => false,'message' => $th->getMessage() ], 400);
+        }
+    }
+    public function filterByStatus($status)
+    {
+        try {
+            return $this->taskRepository->filterByStatus($status);
+        } catch (\Throwable $th) {
+            return response()->json(['success' => false,'message' => $th->getMessage() ], 400);
         }
     }
 }
