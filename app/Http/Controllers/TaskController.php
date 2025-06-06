@@ -16,7 +16,7 @@ class TaskController extends Controller
         $this->taskService = $taskService;
     }
 
-    public function getAllTasks( )
+    public function getAllTasks()
     {
         try {
             $tasks = $this->taskService->getAllTasks(Auth::user()->id);
@@ -93,26 +93,11 @@ class TaskController extends Controller
         }
     }
 
-    public function deleteTask($id)
-    {
-        try {
-            $task = $this->taskService->deleteTask($id);
-
-            if (!$task) {
-                return response()->json(["success" => false, "message" => "Failed to delete task"], 422);
-            }
-
-            return response()->json(["success" => true, "message" => "Task deleted successfully!"], 200);
-        } catch (\Throwable $th) {
-            return response()->json(["success" => false, "message" => $th->getMessage(), "data" => null], 500);
-        }
-    }
-
     public function filterByStatus(Request $request)
     {
         try {
 
-             $validator = Validator::make($request->all(), [
+            $validator = Validator::make($request->all(), [
                 'status' => 'required|in:pending,in_progress,completed', // Assuming status can be 'pending' or 'completed'
             ], [
                 'status.required' => 'O estado é obrigatório.',
@@ -122,9 +107,40 @@ class TaskController extends Controller
             if ($validator->fails()) {
                 return response()->json(["success" => false, "message" => $validator->errors()], 422);
             }
+
             $tasks = $this->taskService->filterByStatus($request->all());
 
             return response()->json(["success" => true, "data" => $tasks, "message" => "Tasks filtered by status successfully!"], 200);
+
+        } catch (\Throwable $th) {
+
+            return response()->json(["success" => false, "message" => $th->getMessage(), "data" => null], 500);
+        }
+    }
+
+    public function deleteTask($id)
+    {
+        try {
+
+            $validator = Validator::make(['id' => $id], [
+
+                'id' => 'required|integer|exists:tasks,id',
+            ], [
+                'id.required' => 'O ID da tarefa é obrigatório.',
+                'id.integer' => 'O ID da tarefa deve ser um número inteiro.',
+                'id.exists' => 'A tarefa com o ID fornecido não existe.',
+            ]);
+            
+            if ($validator->fails()) {
+                return response()->json(["success" => false, "message" => $validator->errors()], 422);
+            }
+            $task = $this->taskService->deleteTask($id);
+
+            if (!$task) {
+                return response()->json(["success" => false, "message" => "Task not found!"], 404);
+            }
+
+            return response()->json(["success" => true, "message" => "Task deleted successfully!"], 200);
         } catch (\Throwable $th) {
             return response()->json(["success" => false, "message" => $th->getMessage(), "data" => null], 500);
         }

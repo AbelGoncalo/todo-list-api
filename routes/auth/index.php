@@ -7,7 +7,7 @@ use App\Http\Controllers\Api\RecoverPasswordController;
 /**route public */
 Route::group(['prefix' => 'auth'], function ($router) {
     Route::post('/register', [AuthController::class, 'createUser']);
-    Route::post('/login', [AuthController::class, 'login'])->name('login');
+    Route::post('/login', [AuthController::class, 'login'])->name('auth.login');
 });
 
 

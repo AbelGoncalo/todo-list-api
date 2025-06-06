@@ -99,6 +99,7 @@ class TaskRepository
 
     public function deleteTask($id)
     {
+        
         return $this->model
             ->whereBelongsTo(Auth::user())
             ->where('id', $id)
