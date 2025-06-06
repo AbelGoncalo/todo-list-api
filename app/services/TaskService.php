@@ -52,19 +52,12 @@ class TaskService
 
     public function deleteTask($id)
     {
-        try {
-            return $this->taskRepository->deleteTask($id);
-        } catch (\Throwable $th) {
-            return response()->json(['success' => false,'message' => $th->getMessage() ], 400);
-        }
+        return $this->taskRepository->deleteTask($id);
     }
+
     public function filterByStatus($status)
     {
-        try {
-            return $this->taskRepository->filterByStatus($status);
-        } catch (\Throwable $th) {
-            return response()->json(['success' => false,'message' => $th->getMessage() ], 400);
-        }
+        return $this->taskRepository->filterByStatus($status);
     }
 }
 //
