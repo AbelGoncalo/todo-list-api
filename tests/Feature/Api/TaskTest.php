@@ -55,3 +55,46 @@ test('should list tasks of authenticated user', function () {
         ->assertOk()
         ->assertJsonCount(3);
 });
+
+
+// Atualizar status da tarefa
+it('should update task status', function () {
+    $user = authUser();
+
+    $task = Task::factory()->create([
+        'user_id' => $user->id,
+        'status' => 'pending',
+    ]);
+
+    $payload = ['status' => 'completed'];
+
+    putJson("/api/tasks/{$task->id}", $payload)
+        ->assertOk()
+        ->assertJsonFragment(['status' => 'completed']);
+});
+
+// Deletar tarefa
+test('should delete a task', function () {
+    $user = authUser();
+
+    $task = Task::factory()->create(['user_id' => $user->id]);
+
+    deleteJson("/api/tasks/{$task->id}")
+        ->assertOk()
+        ->assertJson(['message' => 'Task deleted successfully!']);
+
+    expect(Task::find($task->id))->toBeNull();
+});
+
+// Filtrar tarefas por status
+test('should filter tasks by status', function () {
+    $user = authUser();
+
+    Task::factory()->create(['user_id' => $user->id, 'status' => 'pending']);
+    Task::factory()->create(['user_id' => $user->id, 'status' => 'completed']);
+
+    postJson('/api/tasks/status', ['status' => 'completed'])
+        ->assertOk()
+        ->assertJsonFragment(['status' => 'completed'])
+        ->assertJsonMissing(['status' => 'pending']);
+});
