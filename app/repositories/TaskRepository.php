@@ -19,9 +19,9 @@ class TaskRepository
     }
 
 
-    public function getAllTasks($userId)
+    public function getAllTasks()
     {
-        return $this->model::where('user_id', $userId)
+        return $this->model::where('user_id', Auth::user()->id)
             ->orderBy('created_at', 'desc')
             ->get();
     }
@@ -99,7 +99,7 @@ class TaskRepository
 
     public function deleteTask($id)
     {
-        
+
         return $this->model
             ->whereBelongsTo(Auth::user())
             ->where('id', $id)

@@ -14,9 +14,9 @@ class TaskService
         $this->taskRepository = $taskRepository;
     }
 
-    public function getAllTasks($userId)
+    public function getAllTasks()
     {
-        return $this->taskRepository->getAllTasks($userId);
+        return $this->taskRepository->getAllTasks();
     }
 
     public function createTask($data)

@@ -7,6 +7,12 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
+/**
+ * @OA\Tag(
+ *     name="Autenticação",
+ *     description="Endpoints de autenticação de usuários"
+ * )
+ */
 class AuthController extends Controller
 {
     private $authService;
@@ -16,36 +22,49 @@ class AuthController extends Controller
         $this->authService = $authService;
     }
 
+    /**
+     * @OA\Post(
+     *     path="/api/auth/register",
+     *     tags={"Autenticação"},
+     *     summary="Registra um novo usuário",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"name","email","password","confirm_password"},
+     *             @OA\Property(property="name", type="string", example="João Silva"),
+     *             @OA\Property(property="email", type="string", format="email", example="joao@email.com"),
+     *             @OA\Property(property="password", type="string", example="123456"),
+     *             @OA\Property(property="confirm_password", type="string", example="123456")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Usuário criado com sucesso",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="data", type="object"),
+     *             @OA\Property(property="message", type="string", example="User created!")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Erro de validação",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="object")
+     *         )
+     *     )
+     * )
+     */
     public function createUser(Request $request)
     {
         try {
-
             $validator = Validator::make($request->all(), [
                 'name' => 'required|string|min:5|max:255',
                 'email' => 'required|email|max:255|unique:users,email',
                 'password' => 'required|min:6|max:6',
                 'confirm_password' => 'required|min:6|max:6|same:password',
-            ], [
-                'name.required' => 'O nome é obrigatório.',
-                'name.string' => 'O nome deve ser um texto.',
-                'name.min' => 'O nome deve ter no mínimo :min caracteres.',
-                'name.max' => 'O nome deve ter no máximo :max caracteres.',
-
-                'email.required' => 'O e-mail é obrigatório.',
-                'email.email' => 'O e-mail deve ser um endereço de e-mail válido.',
-                'email.max' => 'O e-mail deve ter no máximo :max caracteres.',
-                'email.unique' => 'Este e-mail já está cadastrado.',
-
-                'password.required' => 'A senha é obrigatória.',
-                'password.min' => 'A senha deve ter exatamente :min caracteres.',
-                'password.max' => 'A senha deve ter exatamente :max caracteres.',
-
-                'confirm_password.required' => 'A confirmação de senha é obrigatória.',
-                'confirm_password.min' => 'A confirmação de senha deve ter exatamente :min caracteres.',
-                'confirm_password.max' => 'A confirmação de senha deve ter exatamente :max caracteres.',
-                'confirm_password.same' => 'A confirmação de senha deve ser igual à senha.',
             ]);
-
 
             if ($validator->fails()) {
                 return response()->json(["success" => false, "message" => $validator->errors()], 422);
@@ -59,15 +78,55 @@ class AuthController extends Controller
 
             return response()->json(["success" => true, "data" => $user, "message" => "User created!"], 200);
         } catch (\Throwable $th) {
-
-            return response()->json(["success" => false, "message" => $th, "data" => null], 500);
+            return response()->json(["success" => false, "message" => $th->getMessage(), "data" => null], 500);
         }
     }
 
-
+    /**
+     * @OA\Post(
+     *     path="/api/auth/login",
+     *     tags={"Autenticação"},
+     *     summary="Realiza login do usuário",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"email", "password"},
+     *             @OA\Property(property="email", type="string", format="email", example="joao@email.com"),
+     *             @OA\Property(property="password", type="string", example="123456")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Login bem-sucedido",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="user", type="object"),
+     *             @OA\Property(property="access_token", type="string"),
+     *             @OA\Property(property="token_type", type="string", example="bearer"),
+     *             @OA\Property(property="expires_in", type="integer", example=3600)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Credenciais inválidas",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Unauthorized: invalid credentials.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Erro de validação",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Validation error."),
+     *             @OA\Property(property="errors", type="object")
+     *         )
+     *     )
+     * )
+     */
     public function login(Request $request)
     {
-        // Validação dos dados recebidos
         $validator = Validator::make($request->all(), [
             'email' => 'required|email|max:255',
             'password' => 'required',
@@ -81,7 +140,6 @@ class AuthController extends Controller
             ], 422);
         }
 
-        // Tenta autenticar usando os dados fornecidos
         $credentials = $request->only('email', 'password');
 
         if (!$token = auth('api')->attempt($credentials)) {
@@ -91,7 +149,6 @@ class AuthController extends Controller
             ], 401);
         }
 
-
         $user = auth('api')->user();
 
         return response()->json([
@@ -99,13 +156,29 @@ class AuthController extends Controller
             'user' => $user,
             'access_token' => $token,
             'token_type' => 'bearer',
-            'expires_in' => auth('api')->factory()->getTTL() * 60 // tempo em segundos
+            'expires_in' => auth('api')->factory()->getTTL() * 60
         ]);
     }
 
+    /**
+     * @OA\Get(
+     *     path="/api/auth/logout",
+     *     tags={"Autenticação"},
+     *     summary="Realiza logout do usuário autenticado",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Logout bem-sucedido",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="status", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Successfully logged out"),
+     *             @OA\Property(property="data", type="array", @OA\Items(type="string"))
+     *         )
+     *     )
+     * )
+     */
     public function logout()
     {
-
         Auth::logout();
         return response()->json([
             'status' => true,
