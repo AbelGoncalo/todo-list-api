@@ -19,29 +19,10 @@ API RESTful desenvolvida em Laravel para gerenciamento de tarefas (To-Do List), 
 - Laravel = 12
 
 
-## ⚙️ Instalação
-
-```bash
-git clone https://github.com/AbelGoncalo/todo-api.git
-cd todo-api
-composer install
-cp .env.example .env
-php artisan key:generate
-
-
-
-# 📋 To-Do List API (Laravel)
-
-API RESTful para gerenciamento de tarefas pessoais. Cada usuário pode criar, listar, atualizar o status, deletar e filtrar suas tarefas.
-
----
-
 ## 🚀 Tecnologias Utilizadas
 
-- PHP 8+
-- Laravel 10+
-- Laravel Sanctum (Autenticação)
-- MySQL/PostgreSQL
+- Laravel Jwt (Autenticação)
+- MySQL/Mysql
 - Pest PHP (Testes)
 - Swagger/OpenAPI (Documentação)
 
@@ -59,7 +40,4 @@ php artisan key:generate
 
 # Configure o banco de dados no .env
 php artisan migrate
-
-# Opcional: seed de usuários ou tarefas
-php artisan db:seed
 

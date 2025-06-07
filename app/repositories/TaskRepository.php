@@ -28,18 +28,9 @@ class TaskRepository
 
     public function createTask($data)
     {
-        try {
-
-            // Validate the data if necessary
-            if (empty($data['title']) || empty($data['user_id'])) {
-                throw new \InvalidArgumentException('Title and user_id are required');
-            }
-
-            // Optionally, you can set default values for other fields
-            $data['description'] = $data['description'] ?? null;
-        } catch (\InvalidArgumentException $e) {
-            Log::error('Validation error: ' . $e->getMessage());
-            return response()->json(['error' => $e->getMessage()], 400);
+        // Validate the data if necessary
+        if (empty($data['title']) || empty($data['user_id'])) {
+            throw new \InvalidArgumentException('Title and user_id are required');
         }
         return $this->model->create($data);
     }
@@ -65,41 +56,24 @@ class TaskRepository
     }
 
 
-
-
     public function filterByStatus($status)
     {
-        try {
-
-            return $this->model
-             ->whereBelongsTo(Auth::user())
-             ->where('status', $status)->get();
-        } catch (\Exception $e) {
-            Log::error('Error retrieving tasks by status: ' . $e->getMessage());
-            return response()->json(['error' => 'Something went wrong'], 500);
-        }
+        return $this->model
+            ->whereBelongsTo(Auth::user())
+            ->where('status', $status)->get();
     }
 
 
     public function updateTaskStatus($id, $status)
     {
-        try {
-            $task = $this->model->findOrFail($id);
-            $task->status = $status;
-            $task->save();
-            return $task->fresh();
-        } catch (ModelNotFoundException $e) {
-            Log::error('Task not found: ' . $e->getMessage());
-            return response()->json(['error' => 'Task not found'], 404);
-        } catch (\Exception $e) {
-            Log::error('Error updating task status: ' . $e->getMessage());
-            return response()->json(['error' => 'Something went wrong'], 500);
-        }
+        $task = $this->model->findOrFail($id);
+        $task->status = $status;
+        $task->save();
+        return $task->fresh();
     }
 
     public function deleteTask($id)
     {
-
         return $this->model
             ->whereBelongsTo(Auth::user())
             ->where('id', $id)

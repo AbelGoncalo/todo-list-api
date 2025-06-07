@@ -1,8 +1,9 @@
 <?php
+
 namespace App\Services;
 
 use App\Repositories\TaskRepository;
-use Illuminate\Support\Facades\{Hash,Auth};
+use Illuminate\Support\Facades\{Hash, Auth};
 
 
 class TaskService
@@ -22,7 +23,6 @@ class TaskService
     public function createTask($data)
     {
 
-        try {
 
             $values = [
                 'title' => $data['title'],
@@ -31,23 +31,13 @@ class TaskService
             ];
 
             return $this->taskRepository->createTask($values);
-        } catch (\Throwable $th) {
 
-            return response()->json([
-                'success' => false,
-                'message' => $th->getMessage()
-            ], 400);
-        }
+       
     }
 
     public function updateTask($data, $id)
     {
-        try {
-            return $this->taskRepository->updateTask($data, $id);
-
-        } catch (\Throwable $th) {
-            return response()->json(['success' => false,'message' => $th->getMessage() ], 400);
-        }
+        return $this->taskRepository->updateTask($data, $id);
     }
 
     public function deleteTask($id)
@@ -57,6 +47,9 @@ class TaskService
 
     public function filterByStatus($status)
     {
+        if (!in_array($status, ['pending', 'in_progress', 'completed'])) {
+            return null;
+        }
         return $this->taskRepository->filterByStatus($status);
     }
 }
